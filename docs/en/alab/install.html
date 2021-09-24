@@ -561,17 +561,17 @@ The ideal configuration in case model training and preannotations are required o
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://setup.johnsnowlabs.com/annotationlab/upgrade.sh <span class="nt">-O</span> - | <span class="nb">sudo </span>bash <span class="nt">-s</span> <span class="nt">--</span> <span class="nt">--version</span> VERSION
 </code></pre></div></div>
-<p>Replace VERSION within the above on liners with the version you want to install.</p>
+<p>Replace VERSION within the above one liners with the version you want to install.</p>
 
 <p>After running the install/upgrade script the Annotation Lab is available at http://INSTANCE_IP  or https://INSTANCE_IP</p>
 
-<p>The install/upgrade script display the login credentials for the admin user on the terminal.</p>
+<p>The install/upgrade script displays the login credentials for the admin user on the terminal.</p>
 
 <h2 id="custom-installation">Custom installation</h2>
 
 <h3 id="get-artifact">Get artifact</h3>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Wget https://s3.amazonaws.com/auxdata.johnsnowlabs.com/annotationlab/annotationlab-VERSION.tar.gz
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://s3.amazonaws.com/auxdata.johnsnowlabs.com/annotationlab/annotationlab-VERSION.tar.gz
 </code></pre></div></div>
 <p>replace VERSION with the version you want to download and install.</p>
 
@@ -618,6 +618,7 @@ cachain.pem must include a certificate in the following format:</p>
 </ul>
 
 <p>You can enable daily backups by adding several variables with –set option to helm command in <code class="language-plaintext highlighter-rouge">annotationlab-updater.sh</code>:</p>
+
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>backup.enable<span class="o">=</span><span class="nb">true
 </span>backup.s3_access_key<span class="o">=</span><span class="s2">"&lt;ACCESS_KEY&gt;"</span>
 backup.s3_secret_key<span class="o">=</span><span class="s2">"&lt;SECRET_KEY&gt;"</span>
