@@ -527,45 +527,20 @@
             <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Installation"><meta itemprop="author" content=""/><div class="js-article-content"><div class="docs-wrapper">
 <div class="layout--article"><!-- start custom article top snippet -->
 
-<!-- end custom article top snippet --><div class="article__content" itemprop="articleBody"><h2 id="system-requirements">System requirements</h2>
-<p>You can install Annotation Lab on a Ubuntu 20+ machine.</p>
-
-<h2 id="port-requirements">Port requirements</h2>
-<p>Annotation Lab expects ports 443 and 80 to be open by default.</p>
-
-<h2 id="server-requirements">Server requirements</h2>
-<p>The minimal required configuration is <strong>32GB RAM, 8 Core CPU, 512 SSD</strong>. 
-The ideal configuration in case model training and preannotations are required on a large number of tasks is <strong>64 GiB, 16 Core CPU, 2TB HDD, 512 SSD</strong>.</p>
-
-<h2 id="web-browser-support">Web browser support</h2>
-
-<p>Annotation Lab is tested with the latest version of Google Chrome and is expected to work in the latest versions of:</p>
-
-<p>•   Google Chrome
-•   Apple Safari
-•   Mozilla Firefox</p>
-
-<h2 id="deploy-on-aws">Deploy on AWS</h2>
-
-<p>Visit the <a href="https://aws.amazon.com/marketplace/pp/prodview-nsww5rdpvou4w?sr=0-1&amp;ref_=beagle&amp;applicationId=AWSMPContessa">product page on AWS Marketplace</a> and follow the instructions on the video below to subscribe and deploy.</p>
-
-<div class="cell cell--12 cell--lg-6 cell--sm-12"><div class="video-item"><div class="extensions extensions--video">
-  <iframe src="https://www.youtube.com/embed/ebaewU4BcQA?rel=0&amp;showinfo=0" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
-</div><div class="video-descr">Deploy Annotation Lab via AWS Marketplace</div></div></div>
-
-<h2 id="install-via-script">Install via script</h2>
-
-<h3 id="install-prerequisite">Install prerequisite</h3>
+<!-- end custom article top snippet --><div class="article__content" itemprop="articleBody"><h2 id="deploy-on-a-dedicated-server">Deploy on a dedicated server</h2>
 
 <p>Install Annotation Lab on a dedicated server to reduce the likelihood of conflicts or unexpected behavior.</p>
 
-<h3 id="one-liner-install">One liner install</h3>
+<h3 id="fresh-install">Fresh install</h3>
 
 <p>To install Annotation Lab run the following command:</p>
+
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://setup.johnsnowlabs.com/annotationlab/install.sh <span class="nt">-O</span> - | <span class="nb">sudo </span>bash <span class="nt">-s</span> <span class="nt">--</span> <span class="nt">--version</span> VERSION
 </code></pre></div></div>
 
-<h3 id="one-liner-upgrade">One liner upgrade</h3>
+<p>To upgrade your Annotation Lab installation to a newer version, run the following command on a terminal:</p>
+
+<h3 id="upgrade">Upgrade</h3>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget https://setup.johnsnowlabs.com/annotationlab/upgrade.sh <span class="nt">-O</span> - | <span class="nb">sudo </span>bash <span class="nt">-s</span> <span class="nt">--</span> <span class="nt">--version</span> VERSION
 </code></pre></div></div>
@@ -575,7 +550,15 @@ The ideal configuration in case model training and preannotations are required o
 
 <p>The install/upgrade script displays the login credentials for the admin user on the terminal.</p>
 
-<h2 id="custom-installation">Custom installation</h2>
+<h2 id="deploy-on-the-aws-marketplace">Deploy on the AWS Marketplace</h2>
+
+<p>Visit the <a href="https://aws.amazon.com/marketplace/pp/prodview-nsww5rdpvou4w?sr=0-1&amp;ref_=beagle&amp;applicationId=AWSMPContessa">product page on AWS Marketplace</a> and follow the instructions on the video below to subscribe and deploy.</p>
+
+<div class="cell cell--12 cell--lg-6 cell--sm-12"><div class="video-item"><div class="extensions extensions--video">
+  <iframe src="https://www.youtube.com/embed/ebaewU4BcQA?rel=0&amp;showinfo=0" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
+</div><div class="video-descr">Deploy Annotation Lab via AWS Marketplace</div></div></div>
+
+<h2 id="deploy-on-airgap-environment">Deploy on AirGap environment</h2>
 
 <h3 id="get-artifact">Get artifact</h3>
 
@@ -661,6 +644,22 @@ airflow.sql
 </code></pre></div></div>
 <p>Now you can restore your databases with <code class="language-plaintext highlighter-rouge">psql</code>, <code class="language-plaintext highlighter-rouge">pg_restore</code>, etc.</p>
 
+<h2 id="recommended-configurations">Recommended Configurations</h2>
+
+<p><strong>System requirements</strong>. You can install Annotation Lab on a Ubuntu 20+ machine.</p>
+
+<p><strong>Port requirements</strong>. Annotation Lab expects ports 443 and 80 to be open by default.</p>
+
+<p><strong>Server requirements</strong>. The minimal required configuration is <strong>32GB RAM, 8 Core CPU, 512 SSD</strong>. 
+The ideal configuration in case model training and preannotations are required on a large number of tasks is <strong>64 GiB, 16 Core CPU, 2TB HDD, 512 SSD</strong>.</p>
+
+<p><strong>Web browser support</strong>. Annotation Lab is tested with the latest version of Google Chrome and is expected to work in the latest versions of:</p>
+
+<p>•   Google Chrome</p>
+
+<p>•   Apple Safari</p>
+
+<p>•   Mozilla Firefox</p>
 </div><div class="d-print-none"><footer class="article__footer"><span class="footer_date">Last updated
       <time itemprop="dateModified" datetime="2021-09-29T00:00:00+00:00">Sep 29, 2021</time>
     </span><!-- start custom article footer snippet -->
