@@ -527,8 +527,28 @@
             <i class="far fa-edit"></i></a></div><meta itemprop="headline" content="Release Notes"><meta itemprop="author" content=""/><div class="js-article-content"><div class="docs-wrapper">
 <div class="layout--article"><!-- start custom article top snippet -->
 
-<!-- end custom article top snippet --><div class="article__content" itemprop="articleBody"><h2 id="230">2.3.0</h2>
+<!-- end custom article top snippet --><div class="article__content" itemprop="articleBody"><h2 id="240">2.4.0</h2>
+
+<p>Annotation Lab v2.4.0 adds relation creation features for Visual NER projects and redesigns the Spark NLP Pipeline Config on the Project Setup Page. Several bug fixes and stabilizations are also included. Following are the highlights:</p>
+
 <h3 id="highlights">Highlights</h3>
+<ul>
+  <li>Relations on Visual NER Projects. Annotators can create relations between annotated tokens/regions in Visual NER projects. This functionality is similar to what we already had in text-based projects. It is also possible to assign relation labels using the contextual widget (the “+” sign displayed next to the relation arrow).</li>
+  <li>SparkNLP Pipeline Config page was redesigned. The SparkNLP Pipeline Config in the Setup Page was redesigned to ease filtering, collapsing, and expanding models and labels. For a more intuitive use, the Add Label button was moved to the top right side of the tab and no longer scrolls with the config list.</li>
+  <li>This version also adds many improvements to the new Setup Page. The Training and Active Learning Tabs are only available to projects for which Annotation Lab supports training. When unsaved changes are present in the configuration, the user cannot move to the Training and Active Learning Tab and/or Training cannot be started. When the OCR server was not deployed, imports in the Visual NER project were failing. With this release, when a valid Spark OCR license is present, the OCR server is deployed and the import of pdf and image files is executed.</li>
+</ul>
+
+<h3 id="bug-fixes">Bug fixes</h3>
+<ul>
+  <li>When a login session is timed out and cookies are expired, users had to refresh the page to get the login screen. This known issue has been fixed and the user will be redirected to the login page.</li>
+  <li>When a task was assigned to an annotator who does not have completions for it, the task status was shown incorrectly. This was fixed in this version.</li>
+  <li>While preannotating tasks with some specific types of models, only the first few lines were annotated. We have fixed the Spark NLP pipeline for such models and now the entire document gets preannotations. When Spark NLP for Healthcare license was expired, the deployment was allowed but it used to fail. Now a proper message is shown to Project Owners/Managers and the deployment is not started in such cases.</li>
+  <li>Inconsistencies were present in training logs and some embeddings were not successfully used for models training.</li>
+  <li>Along with these fixes, several UI bugs are also fixed in this release.</li>
+</ul>
+
+<h2 id="230">2.3.0</h2>
+<h3 id="highlights-1">Highlights</h3>
 
 <ul>
   <li>Multipage PDF annotation. Annotation Lab 2.3.0 supports the complete flow of import, annotation, and export for multi-page PDF files. Users have two options for importing a new PDF file into the Visual NER project:
@@ -553,7 +573,7 @@
   </li>
 </ul>
 
-<h3 id="bug-fixes">Bug fixes</h3>
+<h3 id="bug-fixes-1">Bug fixes</h3>
 <ul>
   <li>Validations related to Training Settings across different types of projects were fixed.</li>
   <li>It is not very common to upload an expired license given a valid license is already present. But in case users did that there was an issue while using a license in the spark session because only the last uploaded license was used. Now it has been fixed to use any valid license no matter the order of upload.</li>
@@ -561,7 +581,7 @@
 </ul>
 
 <h2 id="222">2.2.2</h2>
-<h3 id="highlights-1">Highlights</h3>
+<h3 id="highlights-2">Highlights</h3>
 <ul>
   <li>Support for pretrained Relation Extraction and Assertion Status models. A valid Spark NLP for HealthCare License is needed to download pretrained models via the Models Hub page. After download, they can be added to the Project Config and used for preannotations.</li>
   <li>Support for uploading local images. Until this version, only images from remote URLs could be uploaded for Image projects. With this version the Annotation Lab supports uploading images from you local storage/computer. It is possible to either import one image or multiple images by zipping them together. The maximum image file size is 16 MB. If you need to upload files exceding the default configuration, please contact your system administrator who will change the limit size in the installation artifact and run the upgrade script.</li>
@@ -576,7 +596,7 @@
   <li>Miscellaneous. Generally when a first completion in a task is submitted, it is very likely for that completion to be the ground truth for that task. Starting with this version, the first submitted completion gets automatically starred. Hitting submit button on next completion, annotator are asked to either just submit or submit and star it.</li>
 </ul>
 
-<h3 id="bug-fixes-1">Bug fixes</h3>
+<h3 id="bug-fixes-2">Bug fixes</h3>
 <ul>
   <li>On restart of the Annotation Lab machine/VM all Downloaded models (from Models Hub) compatible with Spark NLP 3.1 version were deleted. We have now fixed this issue. Going forward, it is user’s responsibility to remove any incompatible models. Those will only be marked as “Incompatible” in Models Hub.</li>
   <li>This version also fixes some reported issues in training logs.</li>
@@ -587,7 +607,7 @@
 
 <h2 id="210">2.1.0</h2>
 
-<h3 id="highlights-2">Highlights</h3>
+<h3 id="highlights-3">Highlights</h3>
 <ul>
   <li>A new project configuration “Visual NER Labeling” was added, which provides the skeleton for text annotation on scanned images.</li>
   <li>Project Owners or Project Manager can train open-source models too.</li>
@@ -599,7 +619,7 @@
   <li>Security Fixes. We understand and take the security issues as the highest priority. On every release, we run our artifacts and images through series of security testings (Static Code analysis, PenTest, Images Vulnerabilities Test, AWS AMI Scan Test). This version resolves a few critical issues that were recently identified in Python Docker image we use. We have upgraded it to a higher version. Along with this upgrade, we have also refactored our codebase to pass our standard Static Code Analysis.</li>
 </ul>
 
-<h3 id="bug-fixes-2">Bug fixes</h3>
+<h3 id="bug-fixes-3">Bug fixes</h3>
 <ul>
   <li>An issue with using Uploaded models was fixed so any uploaded models can be loaded in Project Config and used for preannotation.</li>
   <li>Issues related to error messages when uploading a valid Spark OCR license and when trying to train NER models while Spark OCR license was expired are now fixed.</li>
@@ -610,7 +630,7 @@
 <p class="btn-block"><a href="https://www.johnsnowlabs.com/model-tuning-and-transfer-learning-in-the-annotation-lab/" class="button button--primary button--rounded button--lg">Read more</a></p>
 
 <h2 id="201">2.0.1</h2>
-<h3 id="highlights-3">Highlights</h3>
+<h3 id="highlights-4">Highlights</h3>
 <ul>
   <li>Inter-Annotation Agreement Charts. To get a measure of how well multiple annotators can make the same annotation decision for a certain category, we are shipping seven different charts. To see these charts users can click on the third tab “Inter-Annotator Agreement” of the Analytics Dashboard of NER projects. There are dropdown boxes to change annotators for comparison purposes. It is also possible to download the data of some charts in CSV format by clicking the download button present at the bottom right corner of each of them.</li>
   <li>Updated CONLL Export. In previous versions, numerous files were created based on Tasks and Completions. There were issues in the Header and no sentences were detected. Also, some punctuations were not correctly exported or were missing. The new CONLL export implementation results in a single file and fixes all the above issues. As in previous versions, if only Starred completions are needed in the exported file, users can select the “Only ground truth” checkbox.</li>
@@ -627,7 +647,7 @@
   <li>Support for adding custom CA certificate chain. Follow the instructions described in instruction.md file present in the installation artifact.</li>
 </ul>
 
-<h3 id="bug-fixes-3">Bug fixes</h3>
+<h3 id="bug-fixes-4">Bug fixes</h3>
 
 <ul>
   <li>When multiple paged OCR file was imported using Spark OCR, the task created did not have pagination.</li>
