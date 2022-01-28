@@ -388,7 +388,7 @@
 <path d="M20.2658 26.412H8.38867V26.5781H20.2658V26.412Z" fill="#9EDEFA"/>
 </svg>
 -->
-</a><div class="sidebar-toc"><ul class="toc toc--navigator"><li class="toc-h1">Annotation Lab</li><li class="toc-h2"><a href="/docs/en/alab/quickstart">Getting Started</a></li><li class="toc-h2"><a href="/docs/en/alab/install">Installation</a></li><li class="toc-h2"><a href="/docs/en/alab/start_page">Home Page</a></li><li class="toc-h2"><a href="/docs/en/alab/project_setup">Project Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/import">Import Documents</a></li><li class="toc-h2"><a href="/docs/en/alab/tasks">Tasks</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation">Annotation</a></li><li class="toc-h2"><a href="/docs/en/alab/models_hub">NLP Models Hub</a></li><li class="toc-h2"><a href="/docs/en/alab/preannotations">Preannotations with Spark NLP</a></li><li class="toc-h2"><a href="/docs/en/alab/active_learning">Active Learning</a></li><li class="toc-h2"><a href="/docs/en/alab/visual_ner">Visual NER</a></li><li class="toc-h2 active"><a href="/docs/en/alab/settings">Annotation Settings</a></li><li class="toc-h2"><a href="/docs/en/alab/analytics">Analytics</a></li><li class="toc-h2"><a href="/docs/en/alab/export">Annotation Export</a></li><li class="toc-h2"><a href="/docs/en/alab/user_management">User Management</a></li><li class="toc-h2"><a href="/docs/en/alab/workflow">Workflow Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/byol">License Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/api">API Integration</a></li><li class="toc-h2"><a href="/docs/en/alab/security">Security and Privacy</a></li><li class="toc-h2"><a href="/docs/en/alab/tutorials">Video Tutorials</a></li><li class="toc-h2"><a href="/docs/en/alab/release_notes">Release Notes</a></li></ul></div></div><div class="page__main js-page-main has-aside cell cell--auto">
+</a><div class="sidebar-toc"><ul class="toc toc--navigator"><li class="toc-h1">Annotation Lab</li><li class="toc-h2"><a href="/docs/en/alab/quickstart">Getting Started</a></li><li class="toc-h2"><a href="/docs/en/alab/install">Installation</a></li><li class="toc-h2"><a href="/docs/en/alab/start_page">Home Page</a></li><li class="toc-h2"><a href="/docs/en/alab/project_setup">Project Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/import">Import Documents</a></li><li class="toc-h2"><a href="/docs/en/alab/tasks">Tasks</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation">Annotation</a></li><li class="toc-h2"><a href="/docs/en/alab/models_hub">NLP Models Hub</a></li><li class="toc-h2"><a href="/docs/en/alab/preannotations">Preannotations with Spark NLP</a></li><li class="toc-h2"><a href="/docs/en/alab/active_learning">Active Learning</a></li><li class="toc-h2"><a href="/docs/en/alab/visual_ner">Visual NER</a></li><li class="toc-h2 active"><a href="/docs/en/alab/settings">Annotation Settings</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation_screen_customization">Annotation Customizations</a></li><li class="toc-h2"><a href="/docs/en/alab/analytics">Analytics</a></li><li class="toc-h2"><a href="/docs/en/alab/export">Annotation Export</a></li><li class="toc-h2"><a href="/docs/en/alab/user_management">User Management</a></li><li class="toc-h2"><a href="/docs/en/alab/workflow">Workflow Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/byol">License Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/api">API Integration</a></li><li class="toc-h2"><a href="/docs/en/alab/security">Security and Privacy</a></li><li class="toc-h2"><a href="/docs/en/alab/tutorials">Video Tutorials</a></li><li class="toc-h2"><a href="/docs/en/alab/release_notes">Release Notes</a></li></ul></div></div><div class="page__main js-page-main has-aside cell cell--auto">
 
       <div class="page__main-inner"><div class="page__header d-print-none"><!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-59JLR64"
@@ -574,6 +574,131 @@ With the option checked:
 
 <p>When checked, this option allow users to annotate all occurences of a label in the current task in one step. 
 <img class="image image--xl" src="/assets/images/annotation_lab/settings/all_occ.gif" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></p>
+
+<h2 id="annotation-screen-customizations">Annotation Screen customizations</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">Annotation Page</code> is highly customizable. Project Owners and Managers can change the layout of their projects based on their needs.</p>
+
+<h3 id="search-filter-for-a-large-number-of-labels">Search filter for a large number of labels</h3>
+
+<p>When a project has a large number of NER/Assertion labels in the taxonomy, the display of the taxonomy takes a lot of screen space and it is difficult for annotators to navigate through all labels. To tackle this challenge, Annotation Lab supports search for labels in NER projects (an autocomplete search option).
+To add the search bar for a large number of NER Labels or Choices use the <code class="language-plaintext highlighter-rouge">Filter</code> tag as shown in the following XML configuration.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Filter/&gt;
+&lt;View&gt;
+
+*** enclose labels tags here ***
+
+&lt;/View&gt;
+
+**** enclose text tags here**
+</code></pre></div></div>
+
+<p><strong>Parameters:</strong></p>
+
+<p>The following parameters/attributes can be used within the <code class="language-plaintext highlighter-rouge">Filter</code> tag.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Param</th>
+      <th>Type</th>
+      <th>Default Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>placeholder</td>
+      <td>string  “"Quick Filter"”</td>
+      <td>Placeholder text for filter</td>
+    </tr>
+    <tr>
+      <td>minlength</td>
+      <td>number 3</td>
+      <td>Size of the filter</td>
+    </tr>
+    <tr>
+      <td>style</td>
+      <td>string</td>
+      <td>CSS style of the string</td>
+    </tr>
+    <tr>
+      <td>hotkey</td>
+      <td>string</td>
+      <td>Hotkey to use to focus on the filter text area</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Usage Example:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Filter placeholder="Quick Filter"/&gt;
+</code></pre></div></div>
+
+<p><img class="image image--xl" src="/assets/images/annotation_lab/2.6.0/filter.png" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></p>
+
+<p>For obtaining the above display on a NER project, the config should look as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;View&gt;
+    &lt;Filter name="fl" toName="label" hotkey="shift+f" minlength="1" /&gt;  
+      &lt;Labels name="label" toName="text"&gt;
+        &lt;Label value="CARDINAL" model="ner_onto_100" background="#af906b"/&gt;
+        &lt;Label value="EVENT" model="ner_onto_100" background="#f384e1"/&gt;
+        ...
+        &lt;Label value="LANGUAGE" model="ner_onto_100" background="#c0dad2"/&gt;
+      &lt;/Labels&gt;
+
+  &lt;Text name="text" value="$text"/&gt;
+&lt;/View&gt;
+</code></pre></div></div>
+
+<p>Notice how users can search for the desired label using the filter bar:
+<img class="image image--xl" src="/assets/images/annotation_lab/2.6.0/ner_label_search.gif" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></p>
+
+<h3 id="resizable-labels-area-and-textbox-area">Resizable labels area and textbox area</h3>
+
+<p>While annotating longer text documents annotators may need to scroll to the top of the document for selecting the label to use, and then  scroll down to create a label. Also, if the text is large, annotators have to scroll to a certain section because the textbox size is fixed. In those cases, the annotation experience can be improved by creating a scrollable labeling area and textbox area.</p>
+
+<p>To add the scroll bar, the <code class="language-plaintext highlighter-rouge">View</code> tag with <code class="language-plaintext highlighter-rouge">overflow-y:scroll</code> attribute can be used as shown in the following XML config structure:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;View style="background:white; height: 100px; overflow-y:scroll; resize:vertical; position:sticky; top:0;"&gt;
+
+*** enclose labels tags here ***
+
+&lt;/View&gt;
+
+&lt;View style="resize:vertical; margin-top:10px; max-height:400px; overflow-y:scroll;"&gt;
+
+**** enclose text tags here**
+&lt;/View&gt;
+</code></pre></div></div>
+
+<p>Once it has been added and saved to the Project Configuration, the scroll bar should be visible.</p>
+
+<p><img class="image image--xl" src="/assets/images/annotation_lab/2.6.0/scroll_bar.png" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></p>
+
+<p><strong>Example</strong>
+Using the following Project Configuration</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;View&gt;
+  &lt;Filter name="fl" toName="label" hotkey="shift+f" minlength="1" /&gt;
+  &lt;View style="background:white; height: 100px; overflow-y:scroll; resize:vertical; position:sticky; top:0;"&gt;
+      &lt;Labels name="label" toName="text"&gt;
+          &lt;Label value="CARDINAL" model="ner_onto_100" background="#af906b"/&gt;
+          &lt;Label value="EVENT" model="ner_onto_100" background="#f384e1"/&gt;
+          &lt;Label value="WORK_OF_ART" model="ner_onto_100" background="#0fbca4"/&gt;
+          ...
+          &lt;Label value="LANGUAGE" model="ner_onto_100" background="#c0dad2"/&gt;
+      &lt;/Labels&gt;
+  &lt;/View&gt;
+  &lt;View style="resize:vertical; margin-top:10px; max-height:400px; overflow-y:scroll;"&gt;
+      &lt;Text name="text" value="$text"&gt;&lt;/Text&gt;
+  &lt;/View&gt;
+&lt;/View&gt;
+</code></pre></div></div>
+
+<p>we’ll obtain the output illustrated below:
+<img class="image image--xl" src="/assets/images/annotation_lab/2.6.0/scroll_and_filter.gif" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></p>
 </div><div class="d-print-none"><footer class="article__footer"><span class="footer_date">Last updated
       <time itemprop="dateModified" datetime="2021-10-06T00:00:00+00:00">Oct 06, 2021</time>
     </span><!-- start custom article footer snippet -->
@@ -701,7 +826,7 @@ hr.code-selector-underlie {
 
 }
 
-</style><div class="article__section-navigator clearfix"><div class="previous nav_link"><span>PREVIOUS</span><a href="/docs/en/alab/visual_ner">Visual NER</a></div><div class="next nav_link"><span>NEXT</span><a href="/docs/en/alab/analytics">Analytics</a></div></div></div>
+</style><div class="article__section-navigator clearfix"><div class="previous nav_link"><span>PREVIOUS</span><a href="/docs/en/alab/visual_ner">Visual NER</a></div><div class="next nav_link"><span>NEXT</span><a href="/docs/en/alab/annotation_screen_customization">Annotation Customizations</a></div></div></div>
 
 </div>
 </div>
