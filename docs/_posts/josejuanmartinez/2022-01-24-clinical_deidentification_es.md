@@ -33,7 +33,7 @@ This pipeline is trained with sciwiki_300d embeddings and can be used to deident
 ```python
 from sparknlp.pretrained import PretrainedPipeline
 
-deid_pipeline = PretrainedPipeline("deid_pipeline", "es", "clinical/models")
+deid_pipeline = PretrainedPipeline("clinical_deidentification", "es", "clinical/models")
 
 sample = """Datos del paciente.
 Nombre:  Jose .
@@ -61,7 +61,7 @@ result = deid_pipeline .annotate(sample)
 ```
 ```scala
 import com.johnsnowlabs.nlp.pretrained.PretrainedPipeline
-val deid_pipeline = new PretrainedPipeline("deid_pipeline", "es", "clinical/models")
+val deid_pipeline = new PretrainedPipeline("clinical_deidentification", "es", "clinical/models")
 
 sample = "Datos del paciente.
 Nombre:  Jose .
