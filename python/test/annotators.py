@@ -28,6 +28,109 @@ from pyspark.ml.clustering import KMeans
 from pyspark.sql.functions import split
 
 
+class TokenizerDebug(unittest.TestCase):
+
+    def setUp(self):
+        self.spark = SparkSessionForTest.spark
+
+    def runTest(self):
+        data = self.spark.createDataFrame([["A simple example"]]).toDF("text")
+        document_assembler = DocumentAssembler() \
+            .setInputCol("text") \
+            .setOutputCol("document")
+        tokenizer = Tokenizer() \
+            .setInputCols(["document"]) \
+            .setOutputCol("token")
+
+        pipeline = Pipeline(stages=[document_assembler, tokenizer])
+        result = pipeline.fit(data).transform(data)
+        result.show(truncate=False)
+
+
+# class UpperCaseTransformer(SparkNLPTransformer):
+#
+#     class UpperCaseAnnotator(Annotator):
+#
+#         @staticmethod
+#         @udf(returnType=Annotation.arrayType())
+#         def annotate(annotations) -> [Annotation]:
+#             upperAnnotations = []
+#             for annotation in annotations:
+#                 upperAnnotation = Annotation(annotation.annotatorType,
+#                                              annotation.begin,
+#                                              annotation.end,
+#                                              annotation.result.upper(),
+#                                              annotation.metadata,
+#                                              annotation.embeddings)
+#                 upperAnnotations.append(upperAnnotation)
+#             return upperAnnotations
+#
+#     def __init__(self):
+#         annotator = self.UpperCaseAnnotator()
+#         super().__init__(annotator)
+
+
+class UpperCaseTransformer(SparkNLPTransformer):
+
+    @staticmethod
+    @udf(returnType=Annotation.arrayType())
+    def annotate(annotations) -> [Annotation]:
+        upperAnnotations = []
+        for annotation in annotations:
+            upperAnnotation = Annotation(annotation.annotatorType,
+                                         annotation.begin,
+                                         annotation.end,
+                                         annotation.result.upper(),
+                                         annotation.metadata,
+                                         annotation.embeddings)
+            upperAnnotations.append(upperAnnotation)
+        return upperAnnotations
+
+
+# class UpperCaseTransformerV2(SparkNLPTransformer, Annotator):
+#     # Raises error RecursionError: maximum recursion depth exceeded
+#     def __init__(self):
+#         super().__init__(UpperCaseTransformerV2())
+#
+#     @staticmethod
+#     def annotate(annotations) -> [Annotation]:
+#         upperAnnotations = []
+#         for annotation in annotations:
+#             upperAnnotation = Annotation(annotation.annotatorType,
+#                                          annotation.begin,
+#                                          annotation.end,
+#                                          annotation.result.upper(),
+#                                          annotation.metadata,
+#                                          annotation.embeddings)
+#             upperAnnotations.append(upperAnnotation)
+#         return upperAnnotations
+
+
+class CustomAnnotatorTest(unittest.TestCase):
+
+    def setUp(self):
+        self.spark = SparkSessionForTest.spark
+
+    def runTest(self):
+        data = self.spark.createDataFrame([["A simple example"]]).toDF("text")
+        document_assembler = DocumentAssembler() \
+            .setInputCol("text") \
+            .setOutputCol("document")
+        tokenizer = Tokenizer() \
+            .setInputCols(["document"]) \
+            .setOutputCol("token")
+
+        upper_case = UpperCaseTransformer() \
+            .setInputCols(["document"]) \
+            .setOutputCol("upper")
+
+        pipeline = Pipeline(stages=[document_assembler, upper_case])
+        pipeline_model = pipeline.fit(data)
+        result = pipeline_model.transform(data)
+        result.show(truncate=False)
+        result.printSchema()
+
+
 class BasicAnnotatorsTestSpec(unittest.TestCase):
 
     def setUp(self):

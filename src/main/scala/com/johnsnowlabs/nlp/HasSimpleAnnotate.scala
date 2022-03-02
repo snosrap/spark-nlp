@@ -20,9 +20,7 @@ import org.apache.spark.ml.Model
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.udf
 
-trait HasSimpleAnnotate[M <: Model[M]] {
-
-  this: AnnotatorModel[M] =>
+trait HasSimpleAnnotate[M <: Model[M]] extends AnnotatorModel[M] {
 
   /**
    * takes a document and annotations and produces new annotations of this annotator's annotation type
