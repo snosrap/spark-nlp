@@ -388,7 +388,7 @@
 <path d="M20.2658 26.412H8.38867V26.5781H20.2658V26.412Z" fill="#9EDEFA"/>
 </svg>
 -->
-</a><div class="sidebar-toc"><ul class="toc toc--navigator"><li class="toc-h1">Annotation Lab</li><li class="toc-h2"><a href="/docs/en/alab/quickstart">Getting Started</a></li><li class="toc-h2"><a href="/docs/en/alab/install">Installation</a></li><li class="toc-h2"><a href="/docs/en/alab/start_page">Home Page</a></li><li class="toc-h2"><a href="/docs/en/alab/project_setup">Project Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/import">Import Documents</a></li><li class="toc-h2"><a href="/docs/en/alab/tasks">Tasks</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation">Annotation</a></li><li class="toc-h2"><a href="/docs/en/alab/models_hub">NLP Models Hub</a></li><li class="toc-h2"><a href="/docs/en/alab/preannotations">Preannotations with Spark NLP</a></li><li class="toc-h2"><a href="/docs/en/alab/active_learning">Active Learning</a></li><li class="toc-h2"><a href="/docs/en/alab/visual_ner">Visual NER</a></li><li class="toc-h2"><a href="/docs/en/alab/settings">Annotation Settings</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation_screen_customization">Annotation Customizations</a></li><li class="toc-h2 active"><a href="/docs/en/alab/analytics">Analytics</a></li><li class="toc-h2"><a href="/docs/en/alab/export">Annotation Export</a></li><li class="toc-h2"><a href="/docs/en/alab/user_management">User Management</a></li><li class="toc-h2"><a href="/docs/en/alab/workflow">Workflow Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/byol">License Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/api">API Integration</a></li><li class="toc-h2"><a href="/docs/en/alab/security">Security and Privacy</a></li><li class="toc-h2"><a href="/docs/en/alab/tutorials">Video Tutorials</a></li><li class="toc-h2"><a href="/docs/en/alab/release_notes">Release Notes</a></li></ul></div></div><div class="page__main js-page-main has-aside cell cell--auto">
+</a><div class="sidebar-toc"><ul class="toc toc--navigator"><li class="toc-h1">Annotation Lab</li><li class="toc-h2"><a href="/docs/en/alab/quickstart">Getting Started</a></li><li class="toc-h2"><a href="/docs/en/alab/install">Installation</a></li><li class="toc-h2"><a href="/docs/en/alab/start_page">Home Page</a></li><li class="toc-h2"><a href="/docs/en/alab/project_setup">Project Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/import">Import Documents</a></li><li class="toc-h2"><a href="/docs/en/alab/tasks">Tasks</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation">Annotation</a></li><li class="toc-h2"><a href="/docs/en/alab/models_hub">NLP Models Hub</a></li><li class="toc-h2"><a href="/docs/en/alab/preannotations">Preannotations with Spark NLP</a></li><li class="toc-h2"><a href="/docs/en/alab/active_learning">Active Learning</a></li><li class="toc-h2"><a href="/docs/en/alab/visual_ner">Visual NER</a></li><li class="toc-h2"><a href="/docs/en/alab/settings">Annotation Settings</a></li><li class="toc-h2"><a href="/docs/en/alab/annotation_screen_customization">Annotation Customizations</a></li><li class="toc-h2 active"><a href="/docs/en/alab/analytics">Analytics</a></li><li class="toc-h2"><a href="/docs/en/alab/export">Annotation Export</a></li><li class="toc-h2"><a href="/docs/en/alab/user_management">User Management</a></li><li class="toc-h2"><a href="/docs/en/alab/workflow">Workflow Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/byol">License Setup</a></li><li class="toc-h2"><a href="/docs/en/alab/api">API Integration</a></li><li class="toc-h2"><a href="/docs/en/alab/infrastructure">Infrastructure</a></li><li class="toc-h2"><a href="/docs/en/alab/security">Security and Privacy</a></li><li class="toc-h2"><a href="/docs/en/alab/tutorials">Video Tutorials</a></li><li class="toc-h2"><a href="/docs/en/alab/release_notes">Release Notes</a></li></ul></div></div><div class="page__main js-page-main has-aside cell cell--auto">
 
       <div class="page__main-inner"><div class="page__header d-print-none"><!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-59JLR64"
@@ -551,6 +551,26 @@ To get access to the IAA charts, navigate on the third tab of the Analytics Dash
 <img class="image image--xl" src="/assets/images/annotation_lab/2.0.0/chunks_extracted.png" style="width:100%; align:center; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);" /></li>
 </ul>
 
+<h2 id="disabled-analytics">Disabled Analytics</h2>
+
+<p>By default, the Analytics dashboards page is disabled. Users can request Admin to enable the Analytics page. The request can be seen by the Admin user’s account, on the Settings page. Once the Admin user approves the request, users can access the analytics page.</p>
+
+<p><img src="https://user-images.githubusercontent.com/10126570/159010289-edbc211c-b2e9-405f-82ba-6a26662fc661.gif" alt="analytics-permission" /></p>
+
+<h2 id="refresh-analytics">Refresh Analytics</h2>
+<p>A refresh button is added to this analytics page. Changes made by the annotators (like creating tasks, adding new completion, etc.) will not be automatically reflected in the Analytics charts. The latter can be updated by pressing the refresh button.</p>
+
+<h2 id="download-data-used-for-charts">Download data used for charts</h2>
+
+<p>CSV file for specific charts can be downloaded using the new download button which will call specific API endpoints: /api/projects/{project_name}/charts/{chart_type}/download_csv</p>
+
+<p><img src="https://user-images.githubusercontent.com/17021686/158564836-691a2b79-f3ca-4317-ad31-51cfbc9d71df.gif" alt="Screen Recording 2022-03-08 at 3 47 49 PM" /></p>
+
+<h2 id="iaa-between-manager-and-annotator">IAA between manager and annotator</h2>
+
+<p>Starting from version 2.8.0, Inter Annotator Agreement(IAA) charts allow the comparison between annotations produced by annotators, project managers, or reviewers.</p>
+
+<p><img src="https://user-images.githubusercontent.com/17021686/158566408-ea39764f-5ceb-4dd3-b1df-09a3ca791b83.gif" alt="Screen Recording 2022-03-14 at 1 45 03 PM" /></p>
 </div><div class="d-print-none"><footer class="article__footer"><span class="footer_date">Last updated
       <time itemprop="dateModified" datetime="2021-08-30T00:00:00+00:00">Aug 30, 2021</time>
     </span><!-- start custom article footer snippet -->
