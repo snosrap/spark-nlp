@@ -18,9 +18,11 @@ package com.johnsnowlabs.nlp.annotators.sbd.pragmatic
 
 import com.johnsnowlabs.nlp.annotators.common.{Sentence, SentenceSplit}
 import com.johnsnowlabs.nlp.annotators.sbd.SentenceDetectorParams
-import com.johnsnowlabs.nlp.{Annotation, AnnotatorModel, HasSimpleAnnotate}
+import com.johnsnowlabs.nlp.{Annotation, AnnotatorModel, HasSimpleAnnotate, JavaAnnotation}
 import org.apache.spark.ml.util.{DefaultParamsReadable, Identifiable}
 import org.apache.spark.sql.{DataFrame, Dataset}
+
+import scala.collection.JavaConverters._
 
 /**
   * Annotator that detects sentence boundaries using any provided approach.
@@ -137,6 +139,26 @@ class SentenceDetector(override val uid: String) extends AnnotatorModel[Sentence
     val sentences = docs.flatMap(doc => tag(doc))
       .filter(t => t.content.nonEmpty && t.content.length >= $(minLength) && get(maxLength).forall(m => t.content.length <= m))
     SentenceSplit.pack(sentences)
+  }
+
+  def annotateJson(jsonMapAnnotations: java.util.List[java.util.Map[String, java.util.List[Float]]]):
+  java.util.List[java.util.Map[String, java.util.List[Float]]]= {
+
+    val annotation: Seq[Annotation] = jsonMapAnnotations.asScala.par.flatMap{ jsonMapAnnotation =>
+      jsonMapAnnotation.asScala.par.map{ case(jsonAnnotation, embeddings) =>
+        val annotation = Annotation.parseJson(jsonAnnotation)
+        Annotation(annotation.annotatorType, annotation.begin, annotation.end, annotation.result,
+          annotation.metadata, embeddings.asScala.toArray)
+      }
+    }.toList
+
+    annotate(annotation).par.map{ annotation =>
+      val annotationWithoutEmbeddings = Annotation(annotation.annotatorType, annotation.begin, annotation.end,
+        annotation.result, annotation.metadata)
+      val annotationJson = Annotation.toJson(annotationWithoutEmbeddings)
+      Map(annotationJson -> annotation.embeddings.toList.asJava).asJava
+    }.toList.asJava
+
   }
 
   override protected def afterAnnotate(dataset: DataFrame): DataFrame = {

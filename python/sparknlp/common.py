@@ -15,12 +15,12 @@
 """Contains Properties for the Annotator classes.
 """
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 
-from pyspark import keyword_only, Row
+from pyspark import keyword_only
 from pyspark.ml import Transformer
 from pyspark.ml.param import Params
-from pyspark.ml.param.shared import Param, TypeConverters, HasOutputCol, HasInputCols
+from pyspark.ml.param.shared import Param, TypeConverters, HasOutputCol, HasInputCols, HasInputCol
 from pyspark.ml.util import JavaMLWritable
 from pyspark.ml.wrapper import JavaModel, JavaEstimator
 from pyspark.sql.functions import udf, col
@@ -60,7 +60,7 @@ class AnnotatorProperties(Params):
 
     def getInputCols(self):
         """Gets current column names of input annotations."""
-        self.getOrDefault(self.inputCols)
+        return self.getOrDefault(self.inputCols)
 
     def setOutputCol(self, value):
         """Sets output column name of annotations.
@@ -74,7 +74,7 @@ class AnnotatorProperties(Params):
 
     def getOutputCol(self):
         """Gets output column name of annotations."""
-        self.getOrDefault(self.outputCol)
+        return self.getOrDefault(self.outputCol)
 
     def setLazyAnnotator(self, value):
         """Sets whether Annotator should be evaluated lazily in a
@@ -100,41 +100,18 @@ class AnnotatorModel(JavaModel, _internal.AnnotatorJavaMLReadable, JavaMLWritabl
 
     @keyword_only
     def setParams(self):
-        print('In Python AnnotatorModel.setParams')
         kwargs = self._input_kwargs
         return self._set(**kwargs)
 
     @keyword_only
     def __init__(self, classname, java_model=None):
-        print('In Python AnnotatorModel constructor')
         super(AnnotatorModel, self).__init__(java_model=java_model)
         if classname and not java_model:
-            print('In Python AnnotatorModel not java_model')
             self.__class__._java_class_name = classname
             self._java_obj = self._new_java_obj(classname, self.uid)
         if java_model is not None:
-            print('In Python AnnotatorModel java_model')
             self._transfer_params_from_java()
         self._setDefault(lazyAnnotator=False)
-
-
-class AnnotatorJava(AnnotatorModel, ABC):
-    # This makes successors to rely on java objects
-    inputAnnotatorTypes = ["document"]
-    outputAnnotatorType = "document"
-
-    @keyword_only
-    def __init__(self, classname, java_model=None):
-        super(AnnotatorJava, self).__init__(java_model=java_model)
-        if classname and not java_model:
-            self.__class__._java_class_name = classname
-            self._java_obj = self._new_java_obj(classname, self.uid)
-        if java_model is not None:
-            self._transfer_params_from_java()
-
-    @abstractmethod
-    def annotate(self, annotations):
-        raise NotImplementedError()
 
 
 class AnnotatorType(object):
@@ -158,64 +135,64 @@ class AnnotatorType(object):
     DUMMY = "dummy"
 
 
+# TODO: SparkNLPTransformer or Annotator??
 class SparkNLPTransformer(Transformer, HasInputCols, HasOutputCol, AnnotatorProperties, metaclass=ABCMeta):
 
-    inputAnnotatorTypes = [AnnotatorType.DOCUMENT]
-    outputAnnotatorType = AnnotatorType.DOCUMENT
-
-    # def __init__(self, annotator):
-    #     super().__init__()
-    #     self.annotator = annotator
+    def __init__(self):
+        super().__init__()
+        self.inputAnnotatorTypes = [AnnotatorType.DOCUMENT]
+        self.outputAnnotatorType = AnnotatorType.DOCUMENT
 
     def _transform(self, dataset):
-        # convertUDF = udf(lambda z: self.annotator.castStringToAnnotation(z), Annotation.arrayType())
-
         processed_dataset = dataset
 
         for inputCol in self.getInputCols():
             data_type = dataset.schema[inputCol].dataType
-            string_result = isinstance(data_type, StringType)
-            annotation_result = isinstance(data_type, ArrayType)
-            dataType = dict(dataset.dtypes)[inputCol]
-            if dataType == "string":
+            if isinstance(data_type, StringType):
                 processed_dataset = dataset.withColumn(self.getOutputCol(),
                                                        self.castStringToAnnotation(col(inputCol)))
-
-            processed_dataset = processed_dataset.withColumn(self.getOutputCol(),
-                                                             self.annotate(col(self.getOutputCol())))
+            if self.isAnnotationType(data_type):
+                processed_dataset = self.castToAnnotation(processed_dataset, inputCol)
 
         return processed_dataset
 
     @staticmethod
+    def isAnnotationType(data_type):
+
+        if isinstance(data_type, ArrayType) and isinstance(data_type.elementType, StructType):
+            fields = data_type.elementType.fields
+            annotation_fields = Annotation.dataType().fields
+
+            fields_structure = list(map(lambda field: (field.dataType, field.metadata, field.name), fields))
+            annotation_structure = list(map(lambda field: (field.dataType, field.metadata, field.name),
+                                            annotation_fields))
+
+            return fields_structure[:-1] == annotation_structure[:-1]
+
+        return False
+
+    def castToAnnotation(self, processed_dataset, input_col):
+        processed_dataset = processed_dataset.withColumn(self.getOutputCol(),
+                                                         self.wrapColumnMetadata(self.annotateUDF(col(input_col))))
+        return processed_dataset
+
+    def wrapColumnMetadata(self, column):
+        return column.alias(self.getOutputCol(), metadata={'annotatorType': self.outputAnnotatorType})
+
+    @staticmethod
     @udf(returnType=Annotation.arrayType())
-    def castStringToAnnotation(rawText):
-        annotation = Annotation(AnnotatorType.DOCUMENT, 0, len(rawText) - 1, rawText, {}, [])
+    def castStringToAnnotation(raw_text):
+        annotation = Annotation(AnnotatorType.DOCUMENT, 0, len(raw_text) - 1, raw_text, {}, [])
         return [annotation]
 
     @staticmethod
     @abstractmethod
-    @udf(returnType=Annotation.arrayType())
-    def annotate(annotations) -> [Annotation]:
+    def annotateUDF(annotations) -> [Annotation]:
         raise NotImplementedError()
 
-
-# class Annotator(metaclass=ABCMeta):
-#
-#     @staticmethod
-#     @abstractmethod
-#     def annotate(annotations) -> [Annotation]:
-#         raise NotImplementedError()
-
-
-class SparkNLPTransformerRDD(Transformer, HasInputCols, HasOutputCol, AnnotatorProperties):
-
-    def _transform(self, dataset):
-        rdd = dataset.rdd.map(self.castToAnnotator)
-        return rdd.toDF()
-
-    @staticmethod
-    def castToAnnotator(rdd):
-        return Row(rdd, "pruebas")
+    @abstractmethod
+    def annotate(self, annotations) -> [Annotation]:
+        raise NotImplementedError()
 
 
 class HasEmbeddingsProperties(Params):
@@ -402,7 +379,7 @@ class HasStorageModel(HasStorageRef, HasCaseSensitiveProperties, HasExcludableSt
 
 
 class AnnotatorApproach(JavaEstimator, JavaMLWritable, _internal.AnnotatorJavaMLReadable, AnnotatorProperties,
-                        _internal.ParamsGettersSetters):
+                        _internal.ParamsGettersSetters, HasInputCol, HasInputCols, HasOutputCol):
 
     @keyword_only
     def __init__(self, classname):

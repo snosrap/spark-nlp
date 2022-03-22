@@ -12,20 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 import re
 import unittest
-import os
+
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.feature import SQLTransformer
+from pyspark.sql.functions import split
 
 from sparknlp.annotator import *
 from sparknlp.base import *
 from sparknlp.training import *
-
 from test.util import SparkContextForTest
 from test.util import SparkSessionForTest
-
-from pyspark.ml.feature import SQLTransformer
-from pyspark.ml.clustering import KMeans
-from pyspark.sql.functions import split
 
 
 class TokenizerDebug(unittest.TestCase):
@@ -47,34 +46,24 @@ class TokenizerDebug(unittest.TestCase):
         result.show(truncate=False)
 
 
-# class UpperCaseTransformer(SparkNLPTransformer):
-#
-#     class UpperCaseAnnotator(Annotator):
-#
-#         @staticmethod
-#         @udf(returnType=Annotation.arrayType())
-#         def annotate(annotations) -> [Annotation]:
-#             upperAnnotations = []
-#             for annotation in annotations:
-#                 upperAnnotation = Annotation(annotation.annotatorType,
-#                                              annotation.begin,
-#                                              annotation.end,
-#                                              annotation.result.upper(),
-#                                              annotation.metadata,
-#                                              annotation.embeddings)
-#                 upperAnnotations.append(upperAnnotation)
-#             return upperAnnotations
-#
-#     def __init__(self):
-#         annotator = self.UpperCaseAnnotator()
-#         super().__init__(annotator)
-
-
-class UpperCaseTransformer(SparkNLPTransformer):
+# TODO: Move to a common test file since SparkNLPTransformer is in common module
+class UpperCaseTransformerTest(SparkNLPTransformer):
 
     @staticmethod
     @udf(returnType=Annotation.arrayType())
-    def annotate(annotations) -> [Annotation]:
+    def annotateUDF(annotations) -> [Annotation]:
+        upperAnnotations = []
+        for annotation in annotations:
+            upperAnnotation = Annotation(annotation.annotatorType,
+                                         annotation.begin,
+                                         annotation.end,
+                                         annotation.result.upper(),
+                                         annotation.metadata,
+                                         annotation.embeddings)
+            upperAnnotations.append(upperAnnotation)
+        return upperAnnotations
+
+    def annotate(self, annotations) -> [Annotation]:
         upperAnnotations = []
         for annotation in annotations:
             upperAnnotation = Annotation(annotation.annotatorType,
@@ -87,25 +76,6 @@ class UpperCaseTransformer(SparkNLPTransformer):
         return upperAnnotations
 
 
-# class UpperCaseTransformerV2(SparkNLPTransformer, Annotator):
-#     # Raises error RecursionError: maximum recursion depth exceeded
-#     def __init__(self):
-#         super().__init__(UpperCaseTransformerV2())
-#
-#     @staticmethod
-#     def annotate(annotations) -> [Annotation]:
-#         upperAnnotations = []
-#         for annotation in annotations:
-#             upperAnnotation = Annotation(annotation.annotatorType,
-#                                          annotation.begin,
-#                                          annotation.end,
-#                                          annotation.result.upper(),
-#                                          annotation.metadata,
-#                                          annotation.embeddings)
-#             upperAnnotations.append(upperAnnotation)
-#         return upperAnnotations
-
-
 class CustomAnnotatorTest(unittest.TestCase):
 
     def setUp(self):
@@ -116,18 +86,20 @@ class CustomAnnotatorTest(unittest.TestCase):
         document_assembler = DocumentAssembler() \
             .setInputCol("text") \
             .setOutputCol("document")
-        tokenizer = Tokenizer() \
-            .setInputCols(["document"]) \
-            .setOutputCol("token")
 
-        upper_case = UpperCaseTransformer() \
+        upper_case = UpperCaseTransformerTest() \
             .setInputCols(["document"]) \
             .setOutputCol("upper")
 
-        pipeline = Pipeline(stages=[document_assembler, upper_case])
+        sentence_detector_1 = SentenceDetector() \
+            .setInputCols(["upper"]) \
+            .setOutputCol("sentence")
+
+        pipeline = Pipeline(stages=[document_assembler, upper_case, sentence_detector_1])
         pipeline_model = pipeline.fit(data)
         result = pipeline_model.transform(data)
         result.show(truncate=False)
+        # print(result.select.schema['hi'].metadata['annotatorType'])
         result.printSchema()
 
 

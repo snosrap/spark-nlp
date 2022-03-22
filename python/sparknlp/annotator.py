@@ -18,6 +18,7 @@ classes.
 
 import sys
 from sparknlp.common import *
+import sparknlp.internal as _internal
 
 # Do NOT delete. Looks redundant but this is key work around for python 2 support.
 if sys.version_info[0] == 2:
@@ -3306,6 +3307,11 @@ class SentenceDetector(AnnotatorModel, SentenceDetectorParams):
             minLength=0,
             maxLength=99999
         )
+
+    def annotate(self, annotations):
+        _sentence_detector = _internal._SentenceDetector()
+        result = _sentence_detector.annotate(annotations)
+        return result
 
 
 class SentimentDetector(AnnotatorApproach):

@@ -22,14 +22,14 @@ which offer additional functionality.
 from abc import ABC
 
 from pyspark import keyword_only
-from pyspark.ml.wrapper import JavaEstimator
 from pyspark.ml.param.shared import Param, Params, TypeConverters
 from pyspark.ml.pipeline import Pipeline, PipelineModel, Estimator, Transformer
-from sparknlp.common import AnnotatorProperties
-from sparknlp.internal import AnnotatorTransformer, RecursiveEstimator, RecursiveTransformer
+from pyspark.ml.wrapper import JavaEstimator
 
-from sparknlp.annotation import Annotation
 import sparknlp.internal as _internal
+from sparknlp.annotation import Annotation
+from sparknlp.common import AnnotatorProperties, SparkNLPTransformer, AnnotatorModel
+from sparknlp.internal import AnnotatorTransformer, RecursiveEstimator, RecursiveTransformer
 
 
 class LightPipeline:
@@ -82,14 +82,13 @@ class LightPipeline:
     def _annotation_from_java(java_annotations):
         annotations = []
         for annotation in java_annotations:
+
             annotations.append(Annotation(annotation.annotatorType(),
                                           annotation.begin(),
                                           annotation.end(),
                                           annotation.result(),
-                                          annotation.metadata(),
-                                          annotation.embeddings
-                                          )
-                               )
+                                          dict(annotation.metadata()),
+                                          list(annotation.embeddings())))
         return annotations
 
     def fullAnnotate(self, target):
@@ -213,6 +212,116 @@ class LightPipeline:
             Whether to ignore unsupported AnnotatorModels.
         """
         return self._lightPipeline.getIgnoreUnsupported()
+
+
+class LightPipelinePython:
+
+    def __init__(self, pipelineModel):
+        self.stages = pipelineModel.stages
+        self.annotators_stages = []
+        self.custom_annotators_stages = []
+        self.input = None
+        self.output = {}
+
+    def annotate(self, target):
+        former_stage = None
+        last_input_col = None
+        self.input = target
+        while len(self.stages) > 0:
+            current_stage = self.stages.pop(0)
+            if isinstance(current_stage, SparkNLPTransformer):
+                self.custom_annotators_stages.append(current_stage)
+            elif self.isAnnotatorInstance(current_stage):
+                self.annotators_stages.append(current_stage)
+            else:
+                raise Exception("Unexpected light pipeline stage")
+
+            if len(self.stages) == 0:
+                self.processStages(former_stage)
+                last_input_col = self.processLastStage(current_stage)
+
+            if len(self.stages) > 0 and former_stage is not None:
+                if not self.areSameTypes(current_stage, former_stage):
+                    self.processStages(former_stage)
+
+            former_stage = current_stage
+
+        output = {last_input_col: self.output[last_input_col]}
+        self.output = []
+        return output
+
+    def processStages(self, former_stage):
+
+        if len(self.annotators_stages) == 0 and len(self.custom_annotators_stages) == 0:
+            return
+
+        if len(self.annotators_stages) > 0 and self.isAnnotatorInstance(former_stage):
+            self.sendStagesToJVM()
+        elif len(self.custom_annotators_stages) > 0 and isinstance(former_stage, SparkNLPTransformer):
+            self.sendStagesToPython()
+        else:
+            raise Exception("Error processing stages in python for LightPipeline")
+
+    def areSameTypes(self, current_stage, former_stage):
+        are_annotators = self.isAnnotatorInstance(current_stage) and self.isAnnotatorInstance(former_stage)
+        are_custom_annotators = isinstance(current_stage, SparkNLPTransformer) and isinstance(former_stage,
+                                                                                              SparkNLPTransformer)
+        return are_annotators or are_custom_annotators
+
+    def isAnnotatorInstance(self, stage):
+        return isinstance(stage, AnnotatorTransformer) or isinstance(stage, AnnotatorModel)
+
+    def processLastStage(self, last_stage):
+
+        if len(self.annotators_stages) == 0 and len(self.custom_annotators_stages) == 0:
+            return last_stage.getOutputCol()
+
+        if len(self.annotators_stages) > 0 and self.isAnnotatorInstance(last_stage):
+            self.sendStagesToJVM()
+            return last_stage.getOutputCol()
+        elif len(self.custom_annotators_stages) > 0 and isinstance(last_stage, SparkNLPTransformer):
+            self.sendStagesToPython()
+            return last_stage.getOutputCol()
+
+    def sendStagesToJVM(self):
+        print(f"Process {len(self.annotators_stages)} annotators in JVM")
+
+        if self.input is not None:  # Document Assembler
+            pipeline_model = PipelineModel(self.annotators_stages)
+            light_pipeline_jvm = LightPipeline(pipeline_model)
+            self.output = light_pipeline_jvm.fullAnnotate(self.input)[0]
+            self.input = None
+        else:
+            for annotator in self.annotators_stages:
+                input_cols = annotator.getInputCols()
+                output_col = annotator.getOutputCol()
+                annotations = self.unpackAnnotations(input_cols)
+                self.output[output_col] = annotator.annotate(annotations)
+
+        self.annotators_stages = []
+
+    def sendStagesToPython(self):
+        print(f"Process {len(self.custom_annotators_stages)} annotators in Python")
+        if len(self.output) == 0:
+            raise Exception("Pipeline should start with document assembler")
+
+        first_custom_annotator = self.custom_annotators_stages[0]
+        input_cols = first_custom_annotator.getInputCols()
+        output_col = first_custom_annotator.getOutputCol()
+        annotations = list(map(lambda key: self.output[key], input_cols))[0]
+        self.output[output_col] = first_custom_annotator.annotate(annotations)
+
+        for custom_annotator in self.custom_annotators_stages[1:]:
+            input_cols = custom_annotator.getInputCols()
+            output_col = custom_annotator.getOutputCol()
+            annotations = self.unpackAnnotations(input_cols)
+            self.output[output_col] = custom_annotator.annotate(annotations)
+
+        self.custom_annotators_stages = []
+
+    def unpackAnnotations(self, input_cols):
+        custom_annotations = list(map(lambda key: self.output.get(key, []), input_cols))[0]
+        return custom_annotations
 
 
 class RecursivePipeline(Pipeline, JavaEstimator):
