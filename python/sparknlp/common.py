@@ -113,6 +113,9 @@ class AnnotatorModel(JavaModel, _internal.AnnotatorJavaMLReadable, JavaMLWritabl
             self._transfer_params_from_java()
         self._setDefault(lazyAnnotator=False)
 
+    def apply(self):
+        return self._java_obj
+
 
 class AnnotatorType(object):
     DOCUMENT = "document"

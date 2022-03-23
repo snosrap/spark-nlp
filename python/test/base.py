@@ -142,6 +142,7 @@ class CustomAnnotatorLightPipelineTest(unittest.TestCase):
             .setOutputCol("upper")
 
         pipeline = Pipeline(stages=[document_assembler, upper_case])
+        # pipeline.fit(data).transform(data).show(truncate=False)
         pipeline_model = pipeline.fit(data)
         light_pipeline = LightPipelinePython(pipeline_model)
         result = light_pipeline.annotate("light example")
@@ -197,6 +198,7 @@ class ThreeCustomAnnotatorsTwoAnnotatorsLightPipelineTest(unittest.TestCase):
             input_col = output_col
 
         pipeline = Pipeline(stages=stages)
+        # pipeline.fit(data).transform(data).show(truncate=False)
         pipeline_model = pipeline.fit(data)
         light_pipeline = LightPipelinePython(pipeline_model)
         result = light_pipeline.annotate("light example")
@@ -253,6 +255,7 @@ class CustomAnnotatorLongLightPipelineTest(unittest.TestCase):
 
         pipeline = Pipeline(stages=stages)
         pipeline_model = pipeline.fit(data)
+        # pipeline.fit(data).transform(data).show(truncate=False)
         light_pipeline = LightPipelinePython(pipeline_model)
         result = light_pipeline.annotate("light example")
         print(result)

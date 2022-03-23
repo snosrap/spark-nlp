@@ -3138,7 +3138,7 @@ class SentenceDetectorParams:
                       typeConverter=TypeConverters.toInt)
 
 
-class SentenceDetector(AnnotatorModel, SentenceDetectorParams):
+class SentenceDetector(AnnotatorModel, SentenceDetectorParams, _internal.AnnotateJava):
     """Annotator that detects sentence boundaries using any provided approach.
 
     Each extracted sentence can be returned in an Array or exploded to separate
@@ -3307,11 +3307,6 @@ class SentenceDetector(AnnotatorModel, SentenceDetectorParams):
             minLength=0,
             maxLength=99999
         )
-
-    def annotate(self, annotations):
-        _sentence_detector = _internal._SentenceDetector()
-        result = _sentence_detector.annotate(annotations)
-        return result
 
 
 class SentimentDetector(AnnotatorApproach):

@@ -141,26 +141,6 @@ class SentenceDetector(override val uid: String) extends AnnotatorModel[Sentence
     SentenceSplit.pack(sentences)
   }
 
-  def annotateJson(jsonMapAnnotations: java.util.List[java.util.Map[String, java.util.List[Float]]]):
-  java.util.List[java.util.Map[String, java.util.List[Float]]]= {
-
-    val annotation: Seq[Annotation] = jsonMapAnnotations.asScala.par.flatMap{ jsonMapAnnotation =>
-      jsonMapAnnotation.asScala.par.map{ case(jsonAnnotation, embeddings) =>
-        val annotation = Annotation.parseJson(jsonAnnotation)
-        Annotation(annotation.annotatorType, annotation.begin, annotation.end, annotation.result,
-          annotation.metadata, embeddings.asScala.toArray)
-      }
-    }.toList
-
-    annotate(annotation).par.map{ annotation =>
-      val annotationWithoutEmbeddings = Annotation(annotation.annotatorType, annotation.begin, annotation.end,
-        annotation.result, annotation.metadata)
-      val annotationJson = Annotation.toJson(annotationWithoutEmbeddings)
-      Map(annotationJson -> annotation.embeddings.toList.asJava).asJava
-    }.toList.asJava
-
-  }
-
   override protected def afterAnnotate(dataset: DataFrame): DataFrame = {
     import org.apache.spark.sql.functions.{array, col, explode}
     if ($(explodeSentences)) {

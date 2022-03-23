@@ -26,7 +26,6 @@ from pyspark.ml.util import JavaMLWritable, JavaMLReadable, JavaMLReader
 from pyspark.ml.wrapper import JavaWrapper, JavaTransformer, JavaEstimator, JavaModel
 from pyspark.sql.dataframe import DataFrame
 
-
 # Helper class used to generate the getters for all params
 from sparknlp.annotation import Annotation
 
@@ -272,15 +271,11 @@ class _LightPipeline(ExtendedJavaWrapper):
                                              parse_embeddings)
 
 
-class _SentenceDetector(ExtendedJavaWrapper):
-    def __init__(self):
-        super(_SentenceDetector, self).__init__("com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector")
+class AnnotateJava:
 
-    def annotate(self, annotations):
-
-        sentence_detector_java = self.apply()
+    def annotate(self, annotations, annotator):
         json_annotations = self.annotationsToJson(annotations)
-        java_output_list = sentence_detector_java.annotateJson(json_annotations)
+        java_output_list = annotator.annotateJson(json_annotations)
         processed_annotations = self.javaOutputToAnnotation(java_output_list)
 
         return processed_annotations
@@ -307,6 +302,13 @@ class _SentenceDetector(ExtendedJavaWrapper):
                 annotations.append(annotation)
 
         return annotations
+
+
+class _SentenceDetector(ExtendedJavaWrapper):
+
+    def __init__(self):
+        super(_SentenceDetector, self).__init__("com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector")
+
 
 # ==================
 # Utils

@@ -284,9 +284,7 @@ class LightPipelinePython:
             return last_stage.getOutputCol()
 
     def sendStagesToJVM(self):
-        print(f"Process {len(self.annotators_stages)} annotators in JVM")
-
-        if self.input is not None:  # Document Assembler
+        if self.input is not None:  # Process initial Document Assembler
             pipeline_model = PipelineModel(self.annotators_stages)
             light_pipeline_jvm = LightPipeline(pipeline_model)
             self.output = light_pipeline_jvm.fullAnnotate(self.input)[0]
@@ -296,12 +294,11 @@ class LightPipelinePython:
                 input_cols = annotator.getInputCols()
                 output_col = annotator.getOutputCol()
                 annotations = self.unpackAnnotations(input_cols)
-                self.output[output_col] = annotator.annotate(annotations)
+                self.output[output_col] = annotator.annotate(annotations, annotator.apply())
 
         self.annotators_stages = []
 
     def sendStagesToPython(self):
-        print(f"Process {len(self.custom_annotators_stages)} annotators in Python")
         if len(self.output) == 0:
             raise Exception("Pipeline should start with document assembler")
 
