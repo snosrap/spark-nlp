@@ -28,11 +28,32 @@ from pyspark.ml.wrapper import JavaEstimator
 
 import sparknlp.internal as _internal
 from sparknlp.annotation import Annotation
-from sparknlp.common import AnnotatorProperties, SparkNLPTransformer, AnnotatorModel
+from sparknlp.common import AnnotatorProperties, SparkNLPTransformer, AnnotatorModel, AnnotatorType
 from sparknlp.internal import AnnotatorTransformer, RecursiveEstimator, RecursiveTransformer
 
 
-class LightPipeline:
+class LightPipelineCommon:
+
+    def __init__(self, pipeline_model):
+        self.pipeline_model = pipeline_model
+
+    def transform(self, dataframe):
+        """Transforms a dataframe provided with the stages of the LightPipeline.
+
+        Parameters
+        ----------
+        dataframe : :class:`pyspark.sql.DataFrame`
+            The Dataframe to be transformed
+
+        Returns
+        -------
+        :class:`pyspark.sql.DataFrame`
+            The transformed DataFrame
+        """
+        return self.pipeline_model.transform(dataframe)
+
+
+class LightPipeline(LightPipelineCommon):
     """Creates a LightPipeline from a Spark PipelineModel.
 
     LightPipeline is a Spark NLP specific Pipeline class equivalent to Spark
@@ -74,22 +95,17 @@ class LightPipeline:
     }
     """
 
-    def __init__(self, pipelineModel, parse_embeddings=False):
-        self.pipeline_model = pipelineModel
-        self._lightPipeline = _internal._LightPipeline(pipelineModel, parse_embeddings).apply()
+    def __init__(self, pipeline_model, parse_embeddings=False):
+        super().__init__(pipeline_model)
+        self.pipeline_model = pipeline_model
+        self.parse_embeddings = parse_embeddings
+        self.stages = pipeline_model.stages
 
-    @staticmethod
-    def _annotation_from_java(java_annotations):
-        annotations = []
-        for annotation in java_annotations:
-
-            annotations.append(Annotation(annotation.annotatorType(),
-                                          annotation.begin(),
-                                          annotation.end(),
-                                          annotation.result(),
-                                          dict(annotation.metadata()),
-                                          list(annotation.embeddings())))
-        return annotations
+        custom_annotators = list(filter(lambda stage: isinstance(stage, SparkNLPTransformer), self.stages))
+        if len(custom_annotators) >= 1:
+            self.has_custom_annotator = True
+        else:
+            self.has_custom_annotator = False
 
     def fullAnnotate(self, target):
         """Annotates the data provided into `Annotation` type results.
@@ -123,15 +139,13 @@ class LightPipeline:
         Annotation(named_entity, 30, 36, B-LOC, {'word': 'Baghdad'}),
         Annotation(named_entity, 37, 37, O, {'word': '.'})]
         """
-        result = []
-        if type(target) is str:
-            target = [target]
-        for row in self._lightPipeline.fullAnnotateJava(target):
-            kas = {}
-            for atype, annotations in row.items():
-                kas[atype] = self._annotation_from_java(annotations)
-            result.append(kas)
-        return result
+
+        if self.has_custom_annotator:
+            light_pipeline_py = _LightPipelinePython(self.pipeline_model, self.parse_embeddings)
+            return light_pipeline_py.annotate(target, 'full_annotate')
+        else:
+            light_pipeline = _LightPipelineJVM(self.pipeline_model, self.parse_embeddings)
+            return light_pipeline.fullAnnotate(target)
 
     def annotate(self, target):
         """Annotates the data provided, extracting the results.
@@ -158,6 +172,47 @@ class LightPipeline:
         >>> result["ner"]
         ['B-ORG', 'O', 'O', 'B-PER', 'O', 'O', 'B-LOC', 'O']
         """
+
+        if self.has_custom_annotator:
+            light_pipeline_py = _LightPipelinePython(self.pipeline_model, self.parse_embeddings)
+            return light_pipeline_py.annotate(target, 'annotate')
+        else:
+            light_pipeline = _LightPipelineJVM(self.pipeline_model, self.parse_embeddings)
+            return light_pipeline.annotate(target)
+
+
+class _LightPipelineJVM:
+    # TODO: Python API(Shpinx) will change. How to know if _LightPipelineJVM will be visible?
+    def __init__(self, pipelineModel, parse_embeddings=False):
+        self.pipeline_model = pipelineModel
+        self._lightPipeline = _internal._LightPipeline(pipelineModel, parse_embeddings).apply()
+
+    @staticmethod
+    def _annotation_from_java(java_annotations):
+        annotations = []
+        for annotation in java_annotations:
+
+            annotations.append(Annotation(annotation.annotatorType(),
+                                          annotation.begin(),
+                                          annotation.end(),
+                                          annotation.result(),
+                                          dict(annotation.metadata()),
+                                          list(annotation.embeddings())))
+        return annotations
+
+    def fullAnnotate(self, target):
+        result = []
+        if type(target) is str:
+            target = [target]
+        for row in self._lightPipeline.fullAnnotateJava(target):
+            kas = {}
+            for atype, annotations in row.items():
+                kas[atype] = self._annotation_from_java(annotations)
+            result.append(kas)
+        return result
+
+    def annotate(self, target):
+
         def reformat(annotations):
             return {k: list(v) for k, v in annotations.items()}
 
@@ -171,21 +226,6 @@ class LightPipeline:
             raise TypeError("target for annotation may be 'str' or 'list'")
 
         return result
-
-    def transform(self, dataframe):
-        """Transforms a dataframe provided with the stages of the LightPipeline.
-
-        Parameters
-        ----------
-        dataframe : :class:`pyspark.sql.DataFrame`
-            The Dataframe to be transformed
-
-        Returns
-        -------
-        :class:`pyspark.sql.DataFrame`
-            The transformed DataFrame
-        """
-        return self.pipeline_model.transform(dataframe)
 
     def setIgnoreUnsupported(self, value):
         """Sets whether to ignore unsupported AnnotatorModels.
@@ -214,21 +254,24 @@ class LightPipeline:
         return self._lightPipeline.getIgnoreUnsupported()
 
 
-class LightPipelinePython:
+class _LightPipelinePython:
 
-    def __init__(self, pipelineModel):
-        self.stages = pipelineModel.stages
+    def __init__(self, pipeline_model, parse_embeddings=False):
+        self.stages = pipeline_model.stages
+        self.parse_embeddings = parse_embeddings
         self.annotators_stages = []
         self.custom_annotators_stages = []
         self.input = None
         self.output = {}
 
-    def annotate(self, target):
+    def annotate(self, target, output_format):
+        self.output.clear()
+        stages_stack = list(range(len(self.stages)))
         former_stage = None
-        last_input_col = None
         self.input = target
-        while len(self.stages) > 0:
-            current_stage = self.stages.pop(0)
+        while len(stages_stack) > 0:
+            current_index_stage = stages_stack.pop(0)
+            current_stage = self.stages[current_index_stage]
             if isinstance(current_stage, SparkNLPTransformer):
                 self.custom_annotators_stages.append(current_stage)
             elif self.isAnnotatorInstance(current_stage):
@@ -236,19 +279,17 @@ class LightPipelinePython:
             else:
                 raise Exception("Unexpected light pipeline stage")
 
-            if len(self.stages) == 0:
+            if len(stages_stack) == 0:
                 self.processStages(former_stage)
-                last_input_col = self.processLastStage(current_stage)
+                self.processLastStage(current_stage)
 
-            if len(self.stages) > 0 and former_stage is not None:
+            if len(stages_stack) > 0 and former_stage is not None:
                 if not self.areSameTypes(current_stage, former_stage):
                     self.processStages(former_stage)
 
             former_stage = current_stage
 
-        output = {last_input_col: self.output[last_input_col]}
-        self.output = []
-        return output
+        return self.buildOutput(output_format)
 
     def processStages(self, former_stage):
 
@@ -274,14 +315,12 @@ class LightPipelinePython:
     def processLastStage(self, last_stage):
 
         if len(self.annotators_stages) == 0 and len(self.custom_annotators_stages) == 0:
-            return last_stage.getOutputCol()
+            return
 
         if len(self.annotators_stages) > 0 and self.isAnnotatorInstance(last_stage):
             self.sendStagesToJVM()
-            return last_stage.getOutputCol()
         elif len(self.custom_annotators_stages) > 0 and isinstance(last_stage, SparkNLPTransformer):
             self.sendStagesToPython()
-            return last_stage.getOutputCol()
 
     def sendStagesToJVM(self):
         if self.input is not None:  # Process initial Document Assembler
@@ -317,8 +356,24 @@ class LightPipelinePython:
         self.custom_annotators_stages = []
 
     def unpackAnnotations(self, input_cols):
-        custom_annotations = list(map(lambda key: self.output.get(key, []), input_cols))[0]
-        return custom_annotations
+        annotations = list(map(lambda key: self.output.get(key, []), input_cols))[0]
+        return annotations
+
+    def buildOutput(self, output_format):
+
+        def unpackResult(annotation):
+            if self.parse_embeddings and \
+                    (annotation.annotatorType == AnnotatorType.WORD_EMBEDDINGS or AnnotatorType.SENTENCE_EMBEDDINGS):
+                return ' '.join([str(embedding) for embedding in annotation.embeddings])
+            else:
+                return annotation.result
+
+        if output_format == 'full_annotate':
+            return [self.output]
+        else:
+            for output_col, annotations in self.output.items():
+                self.output[output_col] = [unpackResult(annotation) for annotation in annotations]
+            return self.output
 
 
 class RecursivePipeline(Pipeline, JavaEstimator):

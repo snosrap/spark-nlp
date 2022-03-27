@@ -15,6 +15,7 @@
 import unittest
 from sparknlp.annotator import *
 from sparknlp.base import *
+from test.common import UpperCaseSparkNLPTransformer
 from test.util import SparkContextForTest, SparkSessionForTest
 
 """
@@ -96,66 +97,14 @@ class RecursiveTestSpec(unittest.TestCase):
         RecursivePipelineModel(model).transform(self.data).show()
 
 
-class UpperCaseTransformerTest(SparkNLPTransformer):
-
-    @staticmethod
-    @udf(returnType=Annotation.arrayType())
-    def annotateUDF(annotations) -> [Annotation]:
-        upperAnnotations = []
-        for annotation in annotations:
-            upperAnnotation = Annotation(annotation.annotatorType,
-                                         annotation.begin,
-                                         annotation.end,
-                                         annotation.result.upper(),
-                                         annotation.metadata,
-                                         annotation.embeddings)
-            upperAnnotations.append(upperAnnotation)
-        return upperAnnotations
-
-    def annotate(self, annotations) -> [Annotation]:
-        upperAnnotations = []
-        for annotation in annotations:
-            upperAnnotation = Annotation(annotation.annotatorType,
-                                         annotation.begin,
-                                         annotation.end,
-                                         annotation.result.upper(),
-                                         annotation.metadata,
-                                         annotation.embeddings)
-            upperAnnotations.append(upperAnnotation)
-        return upperAnnotations
-
-
 class CustomAnnotatorLightPipelineTest(unittest.TestCase):
 
     def setUp(self):
         self.spark = SparkSessionForTest.spark
 
     def runTest(self):
-        data = self.spark.createDataFrame([["A simple example"]]).toDF("text")
-
-        document_assembler = DocumentAssembler() \
-            .setInputCol("text") \
-            .setOutputCol("document")
-
-        upper_case = UpperCaseTransformerTest() \
-            .setInputCols(["document"]) \
-            .setOutputCol("upper")
-
-        pipeline = Pipeline(stages=[document_assembler, upper_case])
-        # pipeline.fit(data).transform(data).show(truncate=False)
-        pipeline_model = pipeline.fit(data)
-        light_pipeline = LightPipelinePython(pipeline_model)
-        result = light_pipeline.annotate("light example")
-        print(result)
-
-
-class OnlyAnnotatorsLightPipelineTest(unittest.TestCase):
-    # TODO: This scenario should use the current LightPipeline without changes
-    def setUp(self):
-        self.spark = SparkSessionForTest.spark
-
-    def runTest(self):
-        data = self.spark.createDataFrame([["A simple example"]]).toDF("text")
+        text = "In London, John Snow is a Physician. In Castle Black, Jon Snow is a Lord Commander"
+        data = self.spark.createDataFrame([[text]]).toDF("text")
 
         document_assembler = DocumentAssembler() \
             .setInputCol("text") \
@@ -165,10 +114,47 @@ class OnlyAnnotatorsLightPipelineTest(unittest.TestCase):
             .setInputCols(["document"]) \
             .setOutputCol("sentence")
 
-        pipeline = Pipeline(stages=[document_assembler, sentence_detector])
+        upper_case = UpperCaseSparkNLPTransformer() \
+            .setInputCols(["sentence"]) \
+            .setOutputCol("upper")
+
+        pipeline = Pipeline(stages=[document_assembler, sentence_detector, upper_case])
         pipeline_model = pipeline.fit(data)
-        light_pipeline = LightPipelinePython(pipeline_model)
-        light_pipeline.annotate("light example")
+        # pipeline_model.transform(data).show(truncate=False)
+        light_pipeline = LightPipeline(pipeline_model)
+        result_annotate = light_pipeline.annotate(text)
+        print(result_annotate)
+        result_full_annotate = light_pipeline.fullAnnotate(text)
+        print(result_full_annotate)
+
+
+class OnlyAnnotatorsLightPipelineTest(unittest.TestCase):
+    def setUp(self):
+        self.spark = SparkSessionForTest.spark
+
+    def runTest(self):
+        text = "In London, John Snow is a Physician. In Castle Black, Jon Snow is a Lord Commander"
+        data = self.spark.createDataFrame([[text]]).toDF("text")
+
+        document_assembler = DocumentAssembler() \
+            .setInputCol("text") \
+            .setOutputCol("document")
+
+        sentence_detector = SentenceDetector() \
+            .setInputCols(["document"]) \
+            .setOutputCol("sentence")
+
+        tokenizer = Tokenizer() \
+            .setInputCols(["sentence"]) \
+            .setOutputCol("token")
+
+        pipeline = Pipeline(stages=[document_assembler, sentence_detector, tokenizer])
+        pipeline_model = pipeline.fit(data)
+        light_pipeline = LightPipeline(pipeline_model)
+        result_annotate = light_pipeline.annotate(text)
+        print(result_annotate)
+        result_full_annotate = light_pipeline.fullAnnotate(text)
+        print(result_full_annotate)
 
 
 class ThreeCustomAnnotatorsTwoAnnotatorsLightPipelineTest(unittest.TestCase):
@@ -189,7 +175,7 @@ class ThreeCustomAnnotatorsTwoAnnotatorsLightPipelineTest(unittest.TestCase):
         input_col = "document"
         for i in range(1, 4):
             output_col = "upper_" + str(i)
-            stages.append(UpperCaseTransformerTest().setInputCols([input_col]).setOutputCol(output_col))
+            stages.append(UpperCaseSparkNLPTransformer().setInputCols([input_col]).setOutputCol(output_col))
             input_col = output_col
 
         for i in range(1, 3):
@@ -200,7 +186,7 @@ class ThreeCustomAnnotatorsTwoAnnotatorsLightPipelineTest(unittest.TestCase):
         pipeline = Pipeline(stages=stages)
         # pipeline.fit(data).transform(data).show(truncate=False)
         pipeline_model = pipeline.fit(data)
-        light_pipeline = LightPipelinePython(pipeline_model)
+        light_pipeline = LightPipeline(pipeline_model)
         result = light_pipeline.annotate("light example")
         print(result)
 
@@ -220,7 +206,7 @@ class CustomAnnotatorLongLightPipelineTest(unittest.TestCase):
             .setInputCols(["document"]) \
             .setOutputCol("sentence_1")
 
-        upper_case_1 = UpperCaseTransformerTest() \
+        upper_case_1 = UpperCaseSparkNLPTransformer() \
             .setInputCols(["sentence_1"]) \
             .setOutputCol("upper_1")
 
@@ -233,7 +219,7 @@ class CustomAnnotatorLongLightPipelineTest(unittest.TestCase):
         input_col = "upper_1"
         for i in range(2, 5):
             output_col = "upper_" + str(i)
-            stages.append(UpperCaseTransformerTest().setInputCols([input_col]).setOutputCol(output_col))
+            stages.append(UpperCaseSparkNLPTransformer().setInputCols([input_col]).setOutputCol(output_col))
             input_col = output_col
 
         for i in range(3, 5):
@@ -241,7 +227,7 @@ class CustomAnnotatorLongLightPipelineTest(unittest.TestCase):
             stages.append(SentenceDetector().setInputCols([input_col]).setOutputCol(output_col))
             input_col = output_col
 
-        upper_case_5 = UpperCaseTransformerTest() \
+        upper_case_5 = UpperCaseSparkNLPTransformer() \
             .setInputCols([output_col]) \
             .setOutputCol("upper_5")
 
@@ -256,6 +242,6 @@ class CustomAnnotatorLongLightPipelineTest(unittest.TestCase):
         pipeline = Pipeline(stages=stages)
         pipeline_model = pipeline.fit(data)
         # pipeline.fit(data).transform(data).show(truncate=False)
-        light_pipeline = LightPipelinePython(pipeline_model)
+        light_pipeline = LightPipeline(pipeline_model)
         result = light_pipeline.annotate("light example")
         print(result)
