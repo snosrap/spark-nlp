@@ -573,30 +573,38 @@
   <li>Previously, when a rule was edited, previously deployed preannotation pipelines using the edited rules were not updated to use the latest version of the rule. Now the user is notified about the edited rule via an alert message “Redeploy preannotation server to apply these changes” on the rule edit form so that the users can redeploy the preannotation model.</li>
 </ul>
 
-<h2 id="273">2.7.3</h2>
-
-<p>Release date: <strong>03-03-2022</strong></p>
-
-<p>This patch release fixes the content of COCO export format for Visual NER projects by adding text and pageNumbers for annotations.</p>
-
 <h2 id="272">2.7.2</h2>
 
 <p>Release date: <strong>28-02-2022</strong></p>
 
-<p>This patch release ensures that the “Select regions after creating” option cannot be turned off for visualNER project. This is necessary for a correct storage and export of region annotations.</p>
+<p>Annotation Lab v2.7.2 includes Visual NER improvements</p>
+
+<h3 id="bug-fixes-1">Bug Fixes</h3>
+<ul>
+  <li>The text token in Visual NER project were missing in some cases when the labeling setting “Select regions after creating” was disabled. Now the setting is always enabled when labeling a Visual NER project.</li>
+  <li>Previously, without any changes made by the user on the configuration page “unsaved changes” message used to pop up. Now, the message only pops up when there is an unsaved configuration change.</li>
+</ul>
 
 <h2 id="271">2.7.1</h2>
 
 <p>Release date: <strong>22-02-2022</strong></p>
 
-<p>This version of Annotation Lab brings support for k3s upgrade and easy installation on Redhat system. Also it includes improvements and fixes for identified bugs.</p>
+<p>Annotation Lab v2.7.1 introduces an upgrade to K3s v1.22.4 and support for Redhat. It also includes improvements and fixes for identified bug. Below are the highlights of this release.</p>
 
 <h3 id="highlights-1">Highlights</h3>
 <ul>
-  <li>K3S v1.22. The new installation of Annotation Lab will use v1.22 of K3S by default. In near future we will provide similar support for existing installations. AWS market place also runs using the upgraded version.</li>
-  <li>Sometimes when changing Project Config, there was some delay before users were allowed to hit the save button. This happened because sometimes model/ocr server was not reachable. The issue was fixed by adding proper information along with loading icon.</li>
+  <li>For new installations, Annotation Lab is now installed on top of K3s v1.22.4. In near future we will provide similar support for existing installations. AWS market place also runs using the upgraded version.</li>
+  <li>With this release Annotation lab can be installed on RedHat servers.</li>
+  <li>Annotation lab 2.7.1 included release version of Spark NLP 3.4.1 and Spark NLP for Healthcare</li>
+</ul>
+
+<h3 id="bug-fixes-2">Bug Fixes</h3>
+<ul>
+  <li>In the previous release, saving Visual NER project configuration took a long time. With this release, the issue has been fixed and the Visual NER project can be created instantly.</li>
+  <li>Due to a bug in Relation Constraint, all the relations we visible when the UI was refreshed. This issue has been resolved and only a valid list of relations is shown after the UI is refreshed.</li>
+  <li>Previously, labels with spaces at the end were considered different. This has been fixed such that the label name with or without space at the end is treated as the same label.</li>
   <li>Importing multiple images as a zip file was not working correctly in the case of Visual NER. This  issue was fixed.</li>
-  <li>Transfer learning issues encountered for some models were also fixed.</li>
+  <li>This version also fixes issues in Transfer Learning/Fine Tuning some NER models.</li>
 </ul>
 
 <h2 id="270">2.7.0</h2>
@@ -623,7 +631,7 @@
 <h3 id="security">Security</h3>
 <p>Security issues related to SQL Injection Vulnerability and Host Header Attack were fixed in this release.</p>
 
-<h3 id="bug-fixes-1">Bug Fixes</h3>
+<h3 id="bug-fixes-3">Bug Fixes</h3>
 <ul>
   <li>Issues related to chunk annotation; Incorrect bounding boxes, Multiple stacking of bounding boxes, Inconsistent IDs of the regions, unchanged labels of one connected region to other were identified and fixed and annotators can now select multiple tokens at once and annotate them as a single chunk</li>
   <li>In the previous release, after an Assertion Status model was trained, it would get deployed without the NER model and hence the preannotation was not working as expected. Going forward, the trained Assertion Model cannot be deployed for projects without a NER model. For this to happen, the “Yes” button in the confirmation box for deploying an assertion model right after training is enabled only when the Project Configuration consists of at least one NER model.</li>
@@ -645,7 +653,7 @@
   <li>Allow combining NER labels and Classification classes from Spark NLP pipeline config. The earlier version had an issue with adding <code class="language-plaintext highlighter-rouge">choice</code> from the predefined classification model to an existing NER project. This issue has been fixed in this version.</li>
 </ul>
 
-<h3 id="bug-fixes-2">Bug Fixes</h3>
+<h3 id="bug-fixes-4">Bug Fixes</h3>
 <ul>
   <li>Previously there was a UI reloading issue when a User was removed from the “Annotators” user group, which has now been fixed. The user can log in without the reloading issue, a warning is shown in UI regarding the missing annotator privilege.</li>
   <li>Also, setting up the <code class="language-plaintext highlighter-rouge">HTML NER Tagging</code> project was not possible in the earlier version which has been fixed in this release.</li>
@@ -677,7 +685,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   <li>A reported issue when logout endpoint was sometimes redirected to insecure http after access token expired was also fixed.</li>
 </ul>
 
-<h3 id="bug-fixes-3">Bug Fixes</h3>
+<h3 id="bug-fixes-5">Bug Fixes</h3>
 
 <ul>
   <li>The <code class="language-plaintext highlighter-rouge">Filters</code> option in the <code class="language-plaintext highlighter-rouge">Models Hub</code> page was not working properly. Now the “Free/Licensed” filter can be selected/deselected without getting any error.</li>
@@ -696,7 +704,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   <li>This version also adds many improvements to the new Setup Page. The Training and Active Learning Tabs are only available to projects for which Annotation Lab supports training. When unsaved changes are present in the configuration, the user cannot move to the Training and Active Learning Tab and/or Training cannot be started. When the OCR server was not deployed, imports in the Visual NER project were failing. With this release, when a valid Spark OCR license is present, the OCR server is deployed and the import of pdf and image files is executed.</li>
 </ul>
 
-<h3 id="bug-fixes-4">Bug fixes</h3>
+<h3 id="bug-fixes-6">Bug fixes</h3>
 <ul>
   <li>When a login session is timed out and cookies are expired, users had to refresh the page to get the login screen. This known issue has been fixed and the user will be redirected to the login page.</li>
   <li>When a task was assigned to an annotator who does not have completions for it, the task status was shown incorrectly. This was fixed in this version.</li>
@@ -731,7 +739,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   </li>
 </ul>
 
-<h3 id="bug-fixes-5">Bug fixes</h3>
+<h3 id="bug-fixes-7">Bug fixes</h3>
 <ul>
   <li>Validations related to Training Settings across different types of projects were fixed.</li>
   <li>It is not very common to upload an expired license given a valid license is already present. But in case users did that there was an issue while using a license in the spark session because only the last uploaded license was used. Now it has been fixed to use any valid license no matter the order of upload.</li>
@@ -754,7 +762,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   <li>Miscellaneous. Generally when a first completion in a task is submitted, it is very likely for that completion to be the ground truth for that task. Starting with this version, the first submitted completion gets automatically starred. Hitting submit button on next completion, annotator are asked to either just submit or submit and star it.</li>
 </ul>
 
-<h3 id="bug-fixes-6">Bug fixes</h3>
+<h3 id="bug-fixes-8">Bug fixes</h3>
 <ul>
   <li>On restart of the Annotation Lab machine/VM all Downloaded models (from Models Hub) compatible with Spark NLP 3.1 version were deleted. We have now fixed this issue. Going forward, it is user’s responsibility to remove any incompatible models. Those will only be marked as “Incompatible” in Models Hub.</li>
   <li>This version also fixes some reported issues in training logs.</li>
@@ -777,7 +785,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   <li>Security Fixes. We understand and take the security issues as the highest priority. On every release, we run our artifacts and images through series of security testings (Static Code analysis, PenTest, Images Vulnerabilities Test, AWS AMI Scan Test). This version resolves a few critical issues that were recently identified in Python Docker image we use. We have upgraded it to a higher version. Along with this upgrade, we have also refactored our codebase to pass our standard Static Code Analysis.</li>
 </ul>
 
-<h3 id="bug-fixes-7">Bug fixes</h3>
+<h3 id="bug-fixes-9">Bug fixes</h3>
 <ul>
   <li>An issue with using Uploaded models was fixed so any uploaded models can be loaded in Project Config and used for preannotation.</li>
   <li>Issues related to error messages when uploading a valid Spark OCR license and when trying to train NER models while Spark OCR license was expired are now fixed.</li>
@@ -805,7 +813,7 @@ Furthermore, we have also extended the keyword-based task search already availab
   <li>Support for adding custom CA certificate chain. Follow the instructions described in instruction.md file present in the installation artifact.</li>
 </ul>
 
-<h3 id="bug-fixes-8">Bug fixes</h3>
+<h3 id="bug-fixes-10">Bug fixes</h3>
 
 <ul>
   <li>When multiple paged OCR file was imported using Spark OCR, the task created did not have pagination.</li>
